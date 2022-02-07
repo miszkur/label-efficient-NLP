@@ -1,6 +1,5 @@
 import tensorflow as tf
-import numpy as np
-import bs4 as bs
+import pandas as pd
 import os
 
 DATA_DIR = 'datasets'
@@ -8,38 +7,19 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 BATCH_SIZE = 32
 SHUFFLE_BUFFER_SIZE = 1024
 
-def parse_xml_file(filename='Restaurants_Train_v2.xml'):
-  data_path = os.path.join(DATA_DIR, filename)
-  with open(data_path , 'r') as f:
-    file = f.read() 
-  file = bs.BeautifulSoup(file, "html.parser")
+def load_dataset(split):
+  df = pd.read_csv(os.path.join(DATA_DIR, f'{split}_final.csv'))
 
-  sentences = file.find_all('sentence')
-  topics = ['ambience', 'anecdotes/miscellaneous', 'food', 'price', 'service']
+  reviews = df.review.to_list()
 
-  reviews = []
   labels = []
-
-  for review in sentences:
-    reviews.append(review.find_all('text')[0].contents[0])
-
-    aspect_categories = review.find_all('aspectcategory')
-    categories_list = []
-    for c in aspect_categories:
-      categories_list.append(c['category'])
-
-    current_label = []
-    for topic in topics:
-      if topic in categories_list:
-        current_label.append(1)
-      else:
-        current_label.append(0)
-    labels.append(current_label)
+  for x in df.itertuples():
+    labels.append(list(x[3:]))
 
   return reviews, labels
 
 
-def create_dataset(is_training=True):
+def create_dataset(is_training=True, split='train'):
   """Load and parse dataset.
   Args:
       filenames: list of image paths
@@ -47,7 +27,10 @@ def create_dataset(is_training=True):
       is_training: boolean to indicate training mode
   """
   
-  reviews, labels = parse_xml_file()
+  assert split in ['train', 'test', 'valid']
+
+  reviews, labels = load_dataset(split)
+
   dataset = tf.data.Dataset.from_tensor_slices((reviews, labels))
   if is_training == True:
       # This is a small dataset, only load it once, and keep it in memory.
