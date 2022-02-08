@@ -44,7 +44,7 @@ class MultiLabelClassifier():
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
     metrics = [
       'binary_accuracy', # hamming_loss = 1 - accuracy
-      tfa.metrics.F1Score(num_classes=self.config.classes_num)
+      tfa.metrics.F1Score(num_classes=self.config.classes_num, threshold=0.5)
     ]
     self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
