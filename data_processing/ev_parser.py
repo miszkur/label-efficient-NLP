@@ -4,7 +4,6 @@ import os
 
 DATA_DIR = 'datasets'
 AUTOTUNE = tf.data.experimental.AUTOTUNE
-BATCH_SIZE = 32
 SHUFFLE_BUFFER_SIZE = 1024
 
 def load_dataset(split):
@@ -19,7 +18,7 @@ def load_dataset(split):
   return reviews, labels
 
 
-def create_dataset(is_training=True, split='train'):
+def create_dataset(batch_size, is_training=True, split='train'):
   """Load and parse dataset.
   Args:
       filenames: list of image paths
@@ -39,7 +38,7 @@ def create_dataset(is_training=True, split='train'):
       dataset = dataset.shuffle(buffer_size=SHUFFLE_BUFFER_SIZE)
       
   # Batch the data for multiple steps
-  dataset = dataset.batch(BATCH_SIZE)
+  dataset = dataset.batch(batch_size)
   # Fetch batches in the background while the model is training.
   dataset = dataset.prefetch(buffer_size=AUTOTUNE)
   
