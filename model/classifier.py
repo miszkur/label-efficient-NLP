@@ -1,12 +1,10 @@
+from numpy import save
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_hub as hub
 import model.bert_mapping as bm
 from official.nlp import optimization  # to create AdamW optimizer
 import matplotlib.pyplot as plt
-
-
-tfk = tf.keras
 
 
 class MultiLabelClassifier():
@@ -29,12 +27,13 @@ class MultiLabelClassifier():
     # tf.estimator.MultiLabelHead(self.config.classes_num)
     net = tf.keras.layers.Dense(
       self.config.classes_num,
-       activation=tfk.activations.sigmoid, 
+       activation=None, 
        name='classifier_head')(net)
 
     return tf.keras.Model(inputs=text_input, outputs=net)
 
   def compile(self, train_ds, epochs=5):
+    self.epochs = epochs
     steps_per_epoch = tf.data.experimental.cardinality(train_ds).numpy()
     num_train_steps = steps_per_epoch * epochs
     optimizer = optimization.create_optimizer(
@@ -44,18 +43,19 @@ class MultiLabelClassifier():
       optimizer_type='adamw')
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
     metrics = [
-      'binary_accuracy',
-      tfa.metrics.HammingLoss(mode='multilabel', threshold=0.5) # TODO: threshold
+      'binary_accuracy', # hamming_loss = 1 - accuracy
+      tfa.metrics.F1Score()
     ]
     self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
-  def train(self, train_ds, val_ds, save_path, epochs=5, show_history=True):
+  def train(self, train_ds, val_ds, save_path, show_history=True):
     history = self.model.fit(
       x=train_ds,
       validation_data=val_ds,
-      epochs=epochs)
+      epochs=self.epochs)
 
-    self.model.save(save_path, include_optimizer=False)
+    if save_path is not None:
+      self.model.save(save_path, include_optimizer=False)
 
     if show_history:
       history_dict = history.history
