@@ -62,8 +62,6 @@ class MultiLabelClassifier():
       self.plot_history(history_dict)
 
   def plot_history(self, history_dict):
-    print(history_dict.keys())
-
     acc = history_dict['binary_accuracy']
     val_acc = history_dict['val_binary_accuracy']
     loss = history_dict['loss']
