@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_hub as hub
-import bert_mapping as bm
+import model.bert_mapping as bm
 from official.nlp import optimization  # to create AdamW optimizer
 import matplotlib.pyplot as plt
 
