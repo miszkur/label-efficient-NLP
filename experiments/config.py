@@ -1,11 +1,5 @@
 import ml_collections
 
-RESULTS_DIR = 'results'
-
-def dataset_config():
-  config = ml_collections.ConfigDict()
-  config.batch_size = 8
-  return config
 
 def bert_config():
   config = ml_collections.ConfigDict()
@@ -18,8 +12,8 @@ def bert_config():
 
 def multilabel_base():
   config = ml_collections.ConfigDict()
-  config.results_dir = RESULTS_DIR
   config.epochs = 5  # 20
 
+  config.batch_size = 8
   config.bert = bert_config()
   return config
