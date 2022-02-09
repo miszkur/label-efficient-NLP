@@ -102,13 +102,13 @@ class MultiLabelClassifier():
     plt.ylabel('Accuracy')
     plt.legend(loc='lower right')
 
-  def evaluate(self, test_ds, labels=None):
+  def evaluate(self, test_ds, target_names=None):
     self.model.evaluate(test_ds)
 
     y_true = np.concatenate([y for x, y in test_ds], axis=0)
     y_pred = self.model.predict(test_ds)
     y_pred = (y_pred > 0.5) 
-    print(classification_report(y_true, y_pred, labels=labels))
+    print(classification_report(y_true, y_pred, target_names=target_names))
 
 
   def load_model(self, saved_model_path):
