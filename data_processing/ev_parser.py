@@ -15,7 +15,8 @@ def load_dataset(split):
   for x in df.itertuples():
     labels.append(list(x[3:]))
 
-  return reviews, labels
+  label_names = df.columns[3:]
+  return reviews, labels, label_names
 
 
 def create_dataset(batch_size, is_training=True, split='train'):
@@ -28,7 +29,7 @@ def create_dataset(batch_size, is_training=True, split='train'):
   
   assert split in ['train', 'test', 'valid']
 
-  reviews, labels = load_dataset(split)
+  reviews, labels, label_names = load_dataset(split)
 
   dataset = tf.data.Dataset.from_tensor_slices((reviews, labels))
   if is_training == True:
@@ -42,4 +43,4 @@ def create_dataset(batch_size, is_training=True, split='train'):
   # Fetch batches in the background while the model is training.
   dataset = dataset.prefetch(buffer_size=AUTOTUNE)
   
-  return dataset
+  return dataset, label_names
