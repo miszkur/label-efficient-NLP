@@ -103,13 +103,20 @@ class MultiLabelClassifier():
     plt.legend(loc='lower right')
 
   def evaluate(self, test_ds, target_names=None):
+    print('Evaluation')
     self.model.evaluate(test_ds)
 
-    y_true = np.concatenate([y for x, y in test_ds], axis=0)
+    print('Per-class performance')
+    y_true = np.concatenate([y for _, y in test_ds], axis=0)
     y_pred = self.model.predict(test_ds)
     y_pred = (y_pred > 0.5) 
     print(classification_report(y_true, y_pred, target_names=target_names))
 
+    print('Per-class accuracy')
+    correctly_classified = (y_pred == y_true)
+    acc = correctly_classified.sum(axis=0) / y_pred.shape[0]
+    for i, name in enumerate(target_names):
+      print(f'{name}: {(acc[i]):.2f}')
 
   def load_model(self, saved_model_path):
       model = tf.keras.models.load_model(
