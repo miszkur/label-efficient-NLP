@@ -1,11 +1,15 @@
-from numpy import save
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_hub as hub
 import model.bert_mapping as bm
-from official.nlp import optimization  # to create AdamW optimizer
 import matplotlib.pyplot as plt
+import numpy as np
+import os
 
+from sklearn.metrics import classification_report
+from official.nlp import optimization  # to create AdamW optimizer
+
+tfk = tf.keras
 
 class MultiLabelClassifier():
   def __init__(self, config):
@@ -25,12 +29,12 @@ class MultiLabelClassifier():
     net = outputs['pooled_output']
     # net = tf.keras.layers.Dropout(0.1)(net)
     # tf.estimator.MultiLabelHead(self.config.classes_num)
-    net = tf.keras.layers.Dense(
+    net = tfk.layers.Dense(
       self.config.classes_num,
        activation=None, 
        name='classifier_head')(net)
 
-    return tf.keras.Model(inputs=text_input, outputs=net)
+    return tfk.Model(inputs=text_input, outputs=net)
 
   def compile(self, train_ds, epochs=5):
     self.epochs = epochs
@@ -49,13 +53,22 @@ class MultiLabelClassifier():
     self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
   def train(self, train_ds, val_ds, save_path, show_history=True):
+    checkpoint_filepath = os.path.join(save_path, 'checkpoint')
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        save_weights_only=True,
+        monitor='val_loss',
+        mode='min',
+        save_best_only=True)
+
     history = self.model.fit(
       x=train_ds,
       validation_data=val_ds,
-      epochs=self.epochs)
+      epochs=self.epochs,
+      callbacks=[model_checkpoint_callback])
 
-    if save_path is not None:
-      self.model.save(save_path, include_optimizer=False)
+    model_save_path = os.path.join(save_path, 'model')
+    self.model.save(model_save_path, include_optimizer=False)
 
     if show_history:
       history_dict = history.history
@@ -88,6 +101,15 @@ class MultiLabelClassifier():
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend(loc='lower right')
+
+  def evaluate(self, test_ds, label_names=None):
+    self.model.evaluate(test_ds)
+
+    y_true = np.concatenate([y for x, y in test_ds], axis=0)
+    y_pred = self.model.predict(test_ds)
+    y_pred = (y_pred > 0.5) 
+    print(classification_report(y_true, y_pred, label_names))
+
 
   def load_model(self, saved_model_path):
       model = tf.keras.models.load_model(
