@@ -15,7 +15,7 @@ def load_dataset(split):
   for x in df.itertuples():
     labels.append(list(x[3:]))
 
-  label_names = df.columns[3:]
+  label_names = df.columns[2:]
   return reviews, labels, label_names
 
 
