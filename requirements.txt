@@ -1,7 +1,8 @@
 tensorflow==2.7.0
 tf-models-official==2.7.0 # Has to be the same as tf version
-tensorflow_addons
-ml_collections
+tensorflow_addons==0.15.0
 tensorflow-text
-tensorflow_hub
-scikit-learn
+tensorflow_hub==0.12.0
+scikit-learn==1.0.2
+matplotlib>=3.2.2
+ml_collections
