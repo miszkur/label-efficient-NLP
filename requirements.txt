@@ -1,4 +1,4 @@
-tensorflow==2.7.0
+tensorflow==2.8.0
 tf-models-official==2.7.0 # Has to be the same as tf version
 tensorflow_addons==0.15.0
 tensorflow-text
